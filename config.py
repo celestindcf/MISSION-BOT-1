@@ -3,7 +3,8 @@ import json
 
 CONFIG_FILE = "config.json"
 TOKEN = os.getenv("DISCORD_TOKEN")
-PREFIX = "!"
+PREFIX = os.getenv("PREFIX", "!")
+OWNER_ID = 1239559463090917407  # Remplace par ton ID Discord
 
 def load_config():
     if not os.path.exists(CONFIG_FILE):
