@@ -349,7 +349,7 @@ async def add_override(ctx, user: discord.Member):
     await ctx.send(f"✅ Override ajouté pour {user.mention}. Il a désormais toutes les permissions.")
 
 # ========== COMMANDE CHECK BLACKLIST JUPITER ==========
-JUPITER_API_URL = os.getenv("JUPITER_API_URL", "https://jupiter-network.pixelhorizons.fr")
+JUPITER_API_URL = os.getenv("JUPITER_API_URL", "http://5.180.34.39:27247")
 JUPITER_API_KEY = os.getenv("JUPITER_API_KEY", "feellikeherjesko")
 
 @bot.command(name="check")
