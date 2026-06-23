@@ -350,13 +350,13 @@ async def add_override(ctx, user: discord.Member):
 
 # ========== COMMANDE CHECK BLACKLIST JUPITER ==========
 JUPITER_API_URL = os.getenv("JUPITER_API_URL", "https://jupiter-network.pixelhorizons.fr")
+JUPITER_API_KEY = os.getenv("JUPITER_API_KEY", "feellikeherjesko")
 
 @bot.command(name="check")
 async def check_blacklist(ctx, user_id: str = None, membre: discord.Member = None):
     """Vérifie si un utilisateur est dans la blacklist Jupiter
     Utilisation: !check @membre ou !check 123456789012345678"""
 
-    # Récupérer l'ID à vérifier
     if membre:
         user_id = str(membre.id)
     elif not user_id:
@@ -367,13 +367,12 @@ async def check_blacklist(ctx, user_id: str = None, membre: discord.Member = Non
         await ctx.send("❌ ID invalide. Utilise un ID Discord valide (17-19 chiffres).")
         return
 
-    # Envoyer un message de chargement
     msg = await ctx.send(f"🔍 Vérification de `{user_id}`...")
 
     try:
-        # Appeler l'API Jupiter
+        headers = {"X-API-Key": JUPITER_API_KEY}
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"{JUPITER_API_URL}/api/check/{user_id}", timeout=10) as response:
+            async with session.get(f"{JUPITER_API_URL}/api/check/{user_id}", headers=headers, timeout=10) as response:
                 if response.status == 200:
                     data = await response.json()
 
