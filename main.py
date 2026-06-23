@@ -33,3 +33,18 @@ if __name__ == "__main__":
         print("❌ Token manquant")
     else:
         bot.run(config.TOKEN)
+# Ajouter un serveur HTTP factice pour Render
+from threading import Thread
+import os
+
+def keep_alive():
+    from flask import Flask
+    app = Flask(__name__)
+    @app.route('/')
+    def home():
+        return "Bot is running!"
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
+
+# Démarrer le serveur HTTP dans un thread séparé
+Thread(target=keep_alive, daemon=True).start()
