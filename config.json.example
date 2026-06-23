@@ -1,0 +1,26 @@
+{
+  "roles": {
+    "commandant": {
+      "name": "Commandant",
+      "id": null,
+      "permissions": ["assign", "unassign", "status", "priority", "missions", "agents", "agent_info", "config_show", "role_rename", "role_link", "user_override", "user_remove", "perms_list"]
+    },
+    "capitaine": {
+      "name": "Capitaine",
+      "id": null,
+      "permissions": ["assign", "status", "missions", "agents"]
+    },
+    "agent": {
+      "name": "Agent",
+      "id": null,
+      "permissions": ["my_missions", "complete"]
+    },
+    "stagiaire": {
+      "name": "Stagiaire",
+      "id": null,
+      "permissions": ["my_missions"]
+    }
+  },
+  "overrides": {},
+  "log_channel": null
+}

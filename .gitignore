@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+data/missions.json
+config.json
+venv/
+.vscode/
+*.log
+.DS_Store
