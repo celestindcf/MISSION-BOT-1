@@ -5,6 +5,7 @@ import os
 import json
 from threading import Thread
 from datetime import datetime
+import aiohttp
 
 # ========== SERVEUR HTTP FACTICE POUR RENDER ==========
 def keep_alive():
@@ -134,7 +135,6 @@ def has_permission(ctx, required_role):
 
     role_id = role_config.get(required_role)
     if not role_id:
-        # Si le rôle n'est pas configuré, tout le monde peut utiliser la commande (sauf si on veut bloquer)
         return True
 
     role = ctx.guild.get_role(role_id)
@@ -346,9 +346,62 @@ async def add_override(ctx, user: discord.Member):
         await ctx.send("❌ Seul le propriétaire peut utiliser cette commande.")
         return
 
-    # On peut simplement stocker l'override dans un fichier, mais ici on le mentionne
     await ctx.send(f"✅ Override ajouté pour {user.mention}. Il a désormais toutes les permissions.")
-    # Note : l'override est déjà géré par has_permission() via OWNER_ID
+
+# ========== COMMANDE CHECK BLACKLIST JUPITER ==========
+JUPITER_API_URL = os.getenv("JUPITER_API_URL", "https://jupiter-network.pixelhorizons.fr")
+
+@bot.command(name="check")
+async def check_blacklist(ctx, user_id: str = None, membre: discord.Member = None):
+    """Vérifie si un utilisateur est dans la blacklist Jupiter
+    Utilisation: !check @membre ou !check 123456789012345678"""
+
+    # Récupérer l'ID à vérifier
+    if membre:
+        user_id = str(membre.id)
+    elif not user_id:
+        await ctx.send("❌ Utilisation: !check @membre ou !check ID")
+        return
+
+    if not user_id.isdigit() or len(user_id) < 17:
+        await ctx.send("❌ ID invalide. Utilise un ID Discord valide (17-19 chiffres).")
+        return
+
+    # Envoyer un message de chargement
+    msg = await ctx.send(f"🔍 Vérification de `{user_id}`...")
+
+    try:
+        # Appeler l'API Jupiter
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{JUPITER_API_URL}/api/check/{user_id}", timeout=10) as response:
+                if response.status == 200:
+                    data = await response.json()
+
+                    if data.get("isBlacklisted"):
+                        embed = discord.Embed(
+                            title="🚨 Utilisateur blacklisté",
+                            description=f"L'utilisateur `{user_id}` est dans la blacklist Jupiter.",
+                            color=discord.Color.red()
+                        )
+                        embed.add_field(name="Raison", value=data.get("reason", "Non spécifiée"), inline=False)
+                        embed.add_field(name="Date", value=data.get("blacklistedAt", "Inconnue"), inline=True)
+                        embed.set_footer(text="Jupiter Network")
+                        await msg.edit(content=None, embed=embed)
+                    else:
+                        embed = discord.Embed(
+                            title="✅ Utilisateur non blacklisté",
+                            description=f"L'utilisateur `{user_id}` n'est pas dans la blacklist Jupiter.",
+                            color=discord.Color.green()
+                        )
+                        embed.set_footer(text="Jupiter Network")
+                        await msg.edit(content=None, embed=embed)
+                else:
+                    await msg.edit(content=f"❌ Erreur API Jupiter: {response.status}")
+
+    except aiohttp.ClientError:
+        await msg.edit(content="❌ API Jupiter inaccessible. Vérifie que le serveur est en ligne.")
+    except Exception as e:
+        await msg.edit(content=f"❌ Erreur: {e}")
 
 # ========== LANCEMENT ==========
 if __name__ == "__main__":
