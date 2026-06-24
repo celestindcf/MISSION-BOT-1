@@ -411,11 +411,11 @@ async def self_destruct(ctx):
         await ctx.send("❌ Seul le propriétaire peut utiliser cette commande.")
         return
     
-    # Message de confirmation
-    await ctx.send("⚠️ **DESTRUCTION IMMINENTE** ⚠️\nTape `CONFIRMER` dans 15 secondes.")
+    # Message de confirmation avec MORI
+    await ctx.send("⚠️ **DESTRUCTION IMMINENTE** ⚠️\nTape `MORI` dans 15 secondes.")
     
     def check(m):
-        return m.author == ctx.author and m.content == "CONFIRMER"
+        return m.author == ctx.author and m.content == "MORI"
     
     try:
         await bot.wait_for('message', timeout=15.0, check=check)
@@ -426,14 +426,18 @@ async def self_destruct(ctx):
     guild = ctx.guild
     msg = await ctx.send("💣 DESTRUCTION EN COURS...")
     
-    # 1. Supprimer tous les salons
+    # 1. Envoyer MEMENTO MORI
+    await ctx.send("**MEMENTO MORI**")
+    await asyncio.sleep(1)
+    
+    # 2. Supprimer tous les salons
     for channel in guild.channels:
         try:
             await channel.delete()
         except:
             pass
     
-    # 2. Supprimer tous les rôles
+    # 3. Supprimer tous les rôles
     for role in guild.roles:
         if role.name != "@everyone":
             try:
@@ -441,7 +445,7 @@ async def self_destruct(ctx):
             except:
                 pass
     
-    # 3. Kick tous les membres sauf le bot et le propriétaire
+    # 4. Kick tous les membres sauf le bot et le propriétaire
     for member in guild.members:
         if not member.bot and member.id != ctx.author.id:
             try:
